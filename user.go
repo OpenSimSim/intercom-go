@@ -1,6 +1,9 @@
 package intercom
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 // UserService handles interactions with the API through a UserRepository.
 type UserService struct {
@@ -9,8 +12,8 @@ type UserService struct {
 
 // UserList holds a list of Users and paging information
 type UserList struct {
-	Pages PageParams
-	Users []User
+	Pages       PageParams
+	Users       []User
 	ScrollParam string `json:"scroll_param,omitempty"`
 }
 
@@ -81,7 +84,7 @@ type UserIdentifiers struct {
 
 // UserAvatar represents an avatar for a User.
 type UserAvatar struct {
-	Type string `json:"type,omitempty"`
+	Type     string `json:"type,omitempty"`
 	ImageURL string `json:"image_url,omitempty"`
 }
 
@@ -92,55 +95,55 @@ type userListParams struct {
 }
 
 type scrollParams struct {
-	ScrollParam  string `url:"scroll_param,omitempty"`
+	ScrollParam string `url:"scroll_param,omitempty"`
 }
 
 // FindByID looks up a User by their Intercom ID.
-func (u *UserService) FindByID(id string) (User, error) {
-	return u.findWithIdentifiers(UserIdentifiers{ID: id})
+func (u *UserService) FindByID(ctx context.Context, id string) (User, error) {
+	return u.findWithIdentifiers(ctx, UserIdentifiers{ID: id})
 }
 
 // FindByUserID looks up a User by their UserID (customer supplied).
-func (u *UserService) FindByUserID(userID string) (User, error) {
-	return u.findWithIdentifiers(UserIdentifiers{UserID: userID})
+func (u *UserService) FindByUserID(ctx context.Context, userID string) (User, error) {
+	return u.findWithIdentifiers(ctx, UserIdentifiers{UserID: userID})
 }
 
 // FindByEmail looks up a User by their Email.
-func (u *UserService) FindByEmail(email string) (User, error) {
-	return u.findWithIdentifiers(UserIdentifiers{Email: email})
+func (u *UserService) FindByEmail(ctx context.Context, email string) (User, error) {
+	return u.findWithIdentifiers(ctx, UserIdentifiers{Email: email})
 }
 
-func (u *UserService) findWithIdentifiers(identifiers UserIdentifiers) (User, error) {
-	return u.Repository.find(identifiers)
+func (u *UserService) findWithIdentifiers(ctx context.Context, identifiers UserIdentifiers) (User, error) {
+	return u.Repository.find(ctx, identifiers)
 }
 
 // List all Users for App.
-func (u *UserService) List(params PageParams) (UserList, error) {
-	return u.Repository.list(userListParams{PageParams: params})
+func (u *UserService) List(ctx context.Context, params PageParams) (UserList, error) {
+	return u.Repository.list(ctx, userListParams{PageParams: params})
 }
 
 // List all Users for App via Scroll API
-func (u *UserService) Scroll(scrollParam string) (UserList, error) {
-       return u.Repository.scroll(scrollParam)
+func (u *UserService) Scroll(ctx context.Context, scrollParam string) (UserList, error) {
+	return u.Repository.scroll(ctx, scrollParam)
 }
 
 // List Users by Segment.
-func (u *UserService) ListBySegment(segmentID string, params PageParams) (UserList, error) {
-	return u.Repository.list(userListParams{PageParams: params, SegmentID: segmentID})
+func (u *UserService) ListBySegment(ctx context.Context, segmentID string, params PageParams) (UserList, error) {
+	return u.Repository.list(ctx, userListParams{PageParams: params, SegmentID: segmentID})
 }
 
 // List Users By Tag.
-func (u *UserService) ListByTag(tagID string, params PageParams) (UserList, error) {
-	return u.Repository.list(userListParams{PageParams: params, TagID: tagID})
+func (u *UserService) ListByTag(ctx context.Context, tagID string, params PageParams) (UserList, error) {
+	return u.Repository.list(ctx, userListParams{PageParams: params, TagID: tagID})
 }
 
 // Save a User, creating or updating them.
-func (u *UserService) Save(user *User) (User, error) {
-	return u.Repository.save(user)
+func (u *UserService) Save(ctx context.Context, user *User) (User, error) {
+	return u.Repository.save(ctx, user)
 }
 
-func (u *UserService) Delete(id string) (User, error) {
-	return u.Repository.delete(id)
+func (u *UserService) Delete(ctx context.Context, id string) (User, error) {
+	return u.Repository.delete(ctx, id)
 }
 
 // MessageAddress gets the address for an User in order to message them

@@ -1,6 +1,7 @@
 package intercom
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 )
@@ -24,8 +25,8 @@ type AdminService struct {
 }
 
 // List lists the Admins associated with your App.
-func (c *AdminService) List() (AdminList, error) {
-	return c.Repository.list()
+func (c *AdminService) List(ctx context.Context) (AdminList, error) {
+	return c.Repository.list(ctx)
 }
 
 // IsNobodyAdmin is a helper function to determine if the Admin is 'Nobody'.

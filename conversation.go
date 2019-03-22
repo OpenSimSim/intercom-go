@@ -1,5 +1,7 @@
 package intercom
 
+import "context"
+
 // ConversationService handles interactions with the API through an ConversationRepository.
 type ConversationService struct {
 	Repository ConversationRepository
@@ -66,12 +68,12 @@ const (
 )
 
 // List all Conversations
-func (c *ConversationService) ListAll(pageParams PageParams) (ConversationList, error) {
-	return c.Repository.list(ConversationListParams{PageParams: pageParams})
+func (c *ConversationService) ListAll(ctx context.Context, pageParams PageParams) (ConversationList, error) {
+	return c.Repository.list(ctx, ConversationListParams{PageParams: pageParams})
 }
 
 // List Conversations by Admin
-func (c *ConversationService) ListByAdmin(admin *Admin, state ConversationListState, pageParams PageParams) (ConversationList, error) {
+func (c *ConversationService) ListByAdmin(ctx context.Context, admin *Admin, state ConversationListState, pageParams PageParams) (ConversationList, error) {
 	params := ConversationListParams{
 		PageParams: pageParams,
 		Type:       "admin",
@@ -83,11 +85,11 @@ func (c *ConversationService) ListByAdmin(admin *Admin, state ConversationListSt
 	if state == SHOW_CLOSED {
 		params.Open = Bool(false)
 	}
-	return c.Repository.list(params)
+	return c.Repository.list(ctx, params)
 }
 
 // List Conversations by User
-func (c *ConversationService) ListByUser(user *User, state ConversationListState, pageParams PageParams) (ConversationList, error) {
+func (c *ConversationService) ListByUser(ctx context.Context, user *User, state ConversationListState, pageParams PageParams) (ConversationList, error) {
 	params := ConversationListParams{
 		PageParams:     pageParams,
 		Type:           "user",
@@ -98,29 +100,29 @@ func (c *ConversationService) ListByUser(user *User, state ConversationListState
 	if state == SHOW_UNREAD {
 		params.Unread = Bool(true)
 	}
-	return c.Repository.list(params)
+	return c.Repository.list(ctx, params)
 }
 
 // Find Conversation by conversation id
-func (c *ConversationService) Find(id string) (Conversation, error) {
-	return c.Repository.find(id)
+func (c *ConversationService) Find(ctx context.Context, id string) (Conversation, error) {
+	return c.Repository.find(ctx, id)
 }
 
 // Mark Conversation as read (by a User)
-func (c *ConversationService) MarkRead(id string) (Conversation, error) {
-	return c.Repository.read(id)
+func (c *ConversationService) MarkRead(ctx context.Context, id string) (Conversation, error) {
+	return c.Repository.read(ctx, id)
 }
 
-func (c *ConversationService) Reply(id string, author MessagePerson, replyType ReplyType, body string) (Conversation, error) {
-	return c.reply(id, author, replyType, body, nil)
+func (c *ConversationService) Reply(ctx context.Context, id string, author MessagePerson, replyType ReplyType, body string) (Conversation, error) {
+	return c.reply(ctx, id, author, replyType, body, nil)
 }
 
 // Reply to a Conversation by id
-func (c *ConversationService) ReplyWithAttachmentURLs(id string, author MessagePerson, replyType ReplyType, body string, attachmentURLs []string) (Conversation, error) {
-	return c.reply(id, author, replyType, body, attachmentURLs)
+func (c *ConversationService) ReplyWithAttachmentURLs(ctx context.Context, id string, author MessagePerson, replyType ReplyType, body string, attachmentURLs []string) (Conversation, error) {
+	return c.reply(ctx, id, author, replyType, body, attachmentURLs)
 }
 
-func (c *ConversationService) reply(id string, author MessagePerson, replyType ReplyType, body string, attachmentURLs []string) (Conversation, error) {
+func (c *ConversationService) reply(ctx context.Context, id string, author MessagePerson, replyType ReplyType, body string, attachmentURLs []string) (Conversation, error) {
 	addr := author.MessageAddress()
 	reply := Reply{
 		Type:           addr.Type,
@@ -135,11 +137,11 @@ func (c *ConversationService) reply(id string, author MessagePerson, replyType R
 		reply.UserID = addr.UserID
 		reply.Email = addr.Email
 	}
-	return c.Repository.reply(id, &reply)
+	return c.Repository.reply(ctx, id, &reply)
 }
 
 // Assign a Conversation to an Admin
-func (c *ConversationService) Assign(id string, assigner, assignee *Admin) (Conversation, error) {
+func (c *ConversationService) Assign(ctx context.Context, id string, assigner, assignee *Admin) (Conversation, error) {
 	assignerAddr := assigner.MessageAddress()
 	assigneeAddr := assignee.MessageAddress()
 	reply := Reply{
@@ -148,17 +150,17 @@ func (c *ConversationService) Assign(id string, assigner, assignee *Admin) (Conv
 		AdminID:    assignerAddr.ID,
 		AssigneeID: assigneeAddr.ID,
 	}
-	return c.Repository.reply(id, &reply)
+	return c.Repository.reply(ctx, id, &reply)
 }
 
 // Open a Conversation (without a body)
-func (c *ConversationService) Open(id string, opener *Admin) (Conversation, error) {
-	return c.reply(id, opener, CONVERSATION_OPEN, "", nil)
+func (c *ConversationService) Open(ctx context.Context, id string, opener *Admin) (Conversation, error) {
+	return c.reply(ctx, id, opener, CONVERSATION_OPEN, "", nil)
 }
 
 // Close a Conversation (without a body)
-func (c *ConversationService) Close(id string, closer *Admin) (Conversation, error) {
-	return c.reply(id, closer, CONVERSATION_CLOSE, "", nil)
+func (c *ConversationService) Close(ctx context.Context, id string, closer *Admin) (Conversation, error) {
+	return c.reply(ctx, id, closer, CONVERSATION_CLOSE, "", nil)
 }
 
 type ConversationListParams struct {

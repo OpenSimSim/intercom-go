@@ -1,6 +1,9 @@
 package intercom
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 // CompanyService handles interactions with the API through a CompanyRepository.
 type CompanyService struct {
@@ -62,62 +65,62 @@ type companyUserListParams struct {
 }
 
 // FindByID finds a Company using their Intercom ID
-func (c *CompanyService) FindByID(id string) (Company, error) {
-	return c.findWithIdentifiers(CompanyIdentifiers{ID: id})
+func (c *CompanyService) FindByID(ctx context.Context, id string) (Company, error) {
+	return c.findWithIdentifiers(ctx, CompanyIdentifiers{ID: id})
 }
 
 // FindByCompanyID finds a Company using their CompanyID
 // CompanyID is a customer-defined field
-func (c *CompanyService) FindByCompanyID(companyID string) (Company, error) {
-	return c.findWithIdentifiers(CompanyIdentifiers{CompanyID: companyID})
+func (c *CompanyService) FindByCompanyID(ctx context.Context, companyID string) (Company, error) {
+	return c.findWithIdentifiers(ctx, CompanyIdentifiers{CompanyID: companyID})
 }
 
 // FindByName finds a Company using their Name
-func (c *CompanyService) FindByName(name string) (Company, error) {
-	return c.findWithIdentifiers(CompanyIdentifiers{Name: name})
+func (c *CompanyService) FindByName(ctx context.Context, name string) (Company, error) {
+	return c.findWithIdentifiers(ctx, CompanyIdentifiers{Name: name})
 }
 
-func (c *CompanyService) findWithIdentifiers(identifiers CompanyIdentifiers) (Company, error) {
-	return c.Repository.find(identifiers)
+func (c *CompanyService) findWithIdentifiers(ctx context.Context, identifiers CompanyIdentifiers) (Company, error) {
+	return c.Repository.find(ctx, identifiers)
 }
 
 // List Companies
-func (c *CompanyService) List(params PageParams) (CompanyList, error) {
-	return c.Repository.list(companyListParams{PageParams: params})
+func (c *CompanyService) List(ctx context.Context, params PageParams) (CompanyList, error) {
+	return c.Repository.list(ctx, companyListParams{PageParams: params})
 }
 
 // List Companies by Segment
-func (c *CompanyService) ListBySegment(segmentID string, params PageParams) (CompanyList, error) {
-	return c.Repository.list(companyListParams{PageParams: params, SegmentID: segmentID})
+func (c *CompanyService) ListBySegment(ctx context.Context, segmentID string, params PageParams) (CompanyList, error) {
+	return c.Repository.list(ctx, companyListParams{PageParams: params, SegmentID: segmentID})
 }
 
 // List Companies by Tag
-func (c *CompanyService) ListByTag(tagID string, params PageParams) (CompanyList, error) {
-	return c.Repository.list(companyListParams{PageParams: params, TagID: tagID})
+func (c *CompanyService) ListByTag(ctx context.Context, tagID string, params PageParams) (CompanyList, error) {
+	return c.Repository.list(ctx, companyListParams{PageParams: params, TagID: tagID})
 }
 
 // List Company Users by ID
-func (c *CompanyService) ListUsersByID(id string, params PageParams) (UserList, error) {
-	return c.listUsersWithIdentifiers(id, companyUserListParams{PageParams: params})
+func (c *CompanyService) ListUsersByID(ctx context.Context, id string, params PageParams) (UserList, error) {
+	return c.listUsersWithIdentifiers(ctx, id, companyUserListParams{PageParams: params})
 }
 
 // List Company Users by CompanyID
-func (c *CompanyService) ListUsersByCompanyID(companyID string, params PageParams) (UserList, error) {
-	return c.listUsersWithIdentifiers("", companyUserListParams{CompanyID: companyID, Type: "user", PageParams: params})
+func (c *CompanyService) ListUsersByCompanyID(ctx context.Context, companyID string, params PageParams) (UserList, error) {
+	return c.listUsersWithIdentifiers(ctx, "", companyUserListParams{CompanyID: companyID, Type: "user", PageParams: params})
 }
 
-func (c *CompanyService) listUsersWithIdentifiers(id string, params companyUserListParams) (UserList, error) {
-	return c.Repository.listUsers(id, params)
+func (c *CompanyService) listUsersWithIdentifiers(ctx context.Context, id string, params companyUserListParams) (UserList, error) {
+	return c.Repository.listUsers(ctx, id, params)
 }
 
 // List all Companies for App via Scroll API
-func (c *CompanyService) Scroll(scrollParam string) (CompanyList, error) {
-	return c.Repository.scroll(scrollParam)
+func (c *CompanyService) Scroll(ctx context.Context, scrollParam string) (CompanyList, error) {
+	return c.Repository.scroll(ctx, scrollParam)
 }
 
 // Save a new Company, or update an existing one.
-func (c *CompanyService) Save(user *Company) (Company, error) {
-	return c.Repository.save(user)
+func (c *CompanyService) Save(ctx context.Context, user *Company) (Company, error) {
+	return c.Repository.save(ctx, user)
 }
 
 func (c Company) String() string {

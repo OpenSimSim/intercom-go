@@ -1,6 +1,9 @@
 package intercom
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 // ContactService handles interactions with the API through a ContactRepository.
 type ContactService struct {
@@ -9,8 +12,8 @@ type ContactService struct {
 
 // ContactList holds a list of Contacts and paging information
 type ContactList struct {
-	Pages    PageParams
-	Contacts []Contact
+	Pages       PageParams
+	Contacts    []Contact
 	ScrollParam string `json:"scroll_param,omitempty"`
 }
 
@@ -49,62 +52,62 @@ type contactListParams struct {
 }
 
 // FindByID looks up a Contact by their Intercom ID.
-func (c *ContactService) FindByID(id string) (Contact, error) {
-	return c.findWithIdentifiers(UserIdentifiers{ID: id})
+func (c *ContactService) FindByID(ctx context.Context, id string) (Contact, error) {
+	return c.findWithIdentifiers(ctx, UserIdentifiers{ID: id})
 }
 
 // FindByUserID looks up a Contact by their UserID (automatically generated server side).
-func (c *ContactService) FindByUserID(userID string) (Contact, error) {
-	return c.findWithIdentifiers(UserIdentifiers{UserID: userID})
+func (c *ContactService) FindByUserID(ctx context.Context, userID string) (Contact, error) {
+	return c.findWithIdentifiers(ctx, UserIdentifiers{UserID: userID})
 }
 
-func (c *ContactService) findWithIdentifiers(identifiers UserIdentifiers) (Contact, error) {
-	return c.Repository.find(identifiers)
+func (c *ContactService) findWithIdentifiers(ctx context.Context, identifiers UserIdentifiers) (Contact, error) {
+	return c.Repository.find(ctx, identifiers)
 }
 
 // List all Contacts for App.
-func (c *ContactService) List(params PageParams) (ContactList, error) {
-	return c.Repository.list(contactListParams{PageParams: params})
+func (c *ContactService) List(ctx context.Context, params PageParams) (ContactList, error) {
+	return c.Repository.list(ctx, contactListParams{PageParams: params})
 }
 
 // List all Contacts for App via Scroll API
-func (c *ContactService) Scroll(scrollParam string) (ContactList, error) {
-       return c.Repository.scroll(scrollParam)
+func (c *ContactService) Scroll(ctx context.Context, scrollParam string) (ContactList, error) {
+	return c.Repository.scroll(ctx, scrollParam)
 }
 
 // ListByEmail looks up a list of Contacts by their Email.
-func (c *ContactService) ListByEmail(email string, params PageParams) (ContactList, error) {
-	return c.Repository.list(contactListParams{PageParams: params, Email: email})
+func (c *ContactService) ListByEmail(ctx context.Context, email string, params PageParams) (ContactList, error) {
+	return c.Repository.list(ctx, contactListParams{PageParams: params, Email: email})
 }
 
 // List Contacts by Segment.
-func (c *ContactService) ListBySegment(segmentID string, params PageParams) (ContactList, error) {
-	return c.Repository.list(contactListParams{PageParams: params, SegmentID: segmentID})
+func (c *ContactService) ListBySegment(ctx context.Context, segmentID string, params PageParams) (ContactList, error) {
+	return c.Repository.list(ctx, contactListParams{PageParams: params, SegmentID: segmentID})
 }
 
 // List Contacts By Tag.
-func (c *ContactService) ListByTag(tagID string, params PageParams) (ContactList, error) {
-	return c.Repository.list(contactListParams{PageParams: params, TagID: tagID})
+func (c *ContactService) ListByTag(ctx context.Context, tagID string, params PageParams) (ContactList, error) {
+	return c.Repository.list(ctx, contactListParams{PageParams: params, TagID: tagID})
 }
 
 // Create Contact
-func (c *ContactService) Create(contact *Contact) (Contact, error) {
-	return c.Repository.create(contact)
+func (c *ContactService) Create(ctx context.Context, contact *Contact) (Contact, error) {
+	return c.Repository.create(ctx, contact)
 }
 
 // Update Contact
-func (c *ContactService) Update(contact *Contact) (Contact, error) {
-	return c.Repository.update(contact)
+func (c *ContactService) Update(ctx context.Context, contact *Contact) (Contact, error) {
+	return c.Repository.update(ctx, contact)
 }
 
 // Convert Contact to User
-func (c *ContactService) Convert(contact *Contact, user *User) (User, error) {
-	return c.Repository.convert(contact, user)
+func (c *ContactService) Convert(ctx context.Context, contact *Contact, user *User) (User, error) {
+	return c.Repository.convert(ctx, contact, user)
 }
 
 // Delete Contact
-func (c *ContactService) Delete(contact *Contact) (Contact, error) {
-	return c.Repository.delete(contact.ID)
+func (c *ContactService) Delete(ctx context.Context, contact *Contact) (Contact, error) {
+	return c.Repository.delete(ctx, contact.ID)
 }
 
 // MessageAddress gets the address for a Contact in order to message them

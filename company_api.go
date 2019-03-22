@@ -1,20 +1,21 @@
 package intercom
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 
-	"gopkg.in/intercom/intercom-go.v2/interfaces"
+	"github.com/opensimsim/intercom-go/interfaces"
 )
 
 // CompanyRepository defines the interface for working with Companies through the API.
 type CompanyRepository interface {
-	find(CompanyIdentifiers) (Company, error)
-	list(companyListParams) (CompanyList, error)
-	listUsers(string, companyUserListParams) (UserList, error)
-	scroll(scrollParam string) (CompanyList, error)
-	save(*Company) (Company, error)
+	find(context.Context, CompanyIdentifiers) (Company, error)
+	list(context.Context, companyListParams) (CompanyList, error)
+	listUsers(context.Context, string, companyUserListParams) (UserList, error)
+	scroll(context.Context, string) (CompanyList, error)
+	save(context.Context, *Company) (Company, error)
 }
 
 // CompanyAPI implements CompanyRepository
@@ -32,9 +33,9 @@ type requestCompany struct {
 	CustomAttributes map[string]interface{} `json:"custom_attributes,omitempty"`
 }
 
-func (api CompanyAPI) find(params CompanyIdentifiers) (Company, error) {
+func (api CompanyAPI) find(ctx context.Context, params CompanyIdentifiers) (Company, error) {
 	company := Company{}
-	data, err := api.getClientForFind(params)
+	data, err := api.getClientForFind(ctx, params)
 	if err != nil {
 		return company, err
 	}
@@ -42,19 +43,19 @@ func (api CompanyAPI) find(params CompanyIdentifiers) (Company, error) {
 	return company, err
 }
 
-func (api CompanyAPI) getClientForFind(params CompanyIdentifiers) ([]byte, error) {
+func (api CompanyAPI) getClientForFind(ctx context.Context, params CompanyIdentifiers) ([]byte, error) {
 	switch {
 	case params.ID != "":
-		return api.httpClient.Get(fmt.Sprintf("/companies/%s", params.ID), nil)
+		return api.httpClient.Get(ctx, fmt.Sprintf("/companies/%s", params.ID), nil)
 	case params.CompanyID != "", params.Name != "":
-		return api.httpClient.Get("/companies", params)
+		return api.httpClient.Get(ctx, "/companies", params)
 	}
 	return nil, errors.New("Missing Company Identifier")
 }
 
-func (api CompanyAPI) list(params companyListParams) (CompanyList, error) {
+func (api CompanyAPI) list(ctx context.Context, params companyListParams) (CompanyList, error) {
 	companyList := CompanyList{}
-	data, err := api.httpClient.Get("/companies", params)
+	data, err := api.httpClient.Get(ctx, "/companies", params)
 	if err != nil {
 		return companyList, err
 	}
@@ -62,9 +63,9 @@ func (api CompanyAPI) list(params companyListParams) (CompanyList, error) {
 	return companyList, err
 }
 
-func (api CompanyAPI) listUsers(id string, params companyUserListParams) (UserList, error) {
+func (api CompanyAPI) listUsers(ctx context.Context, id string, params companyUserListParams) (UserList, error) {
 	companyUserList := UserList{}
-	data, err := api.getClientForListUsers(id, params)
+	data, err := api.getClientForListUsers(ctx, id, params)
 	if err != nil {
 		return companyUserList, err
 	}
@@ -72,20 +73,20 @@ func (api CompanyAPI) listUsers(id string, params companyUserListParams) (UserLi
 	return companyUserList, err
 }
 
-func (api CompanyAPI) getClientForListUsers(id string, params companyUserListParams) ([]byte, error) {
+func (api CompanyAPI) getClientForListUsers(ctx context.Context, id string, params companyUserListParams) ([]byte, error) {
 	switch {
 	case id != "":
-		return api.httpClient.Get(fmt.Sprintf("/companies/%s/users", id), params)
+		return api.httpClient.Get(ctx, fmt.Sprintf("/companies/%s/users", id), params)
 	case params.CompanyID != "", params.Type == "user":
-		return api.httpClient.Get("/companies", params)
+		return api.httpClient.Get(ctx, "/companies", params)
 	}
 	return nil, errors.New("Missing Company Identifier")
 }
 
-func (api CompanyAPI) scroll(scrollParam string) (CompanyList, error) {
+func (api CompanyAPI) scroll(ctx context.Context, scrollParam string) (CompanyList, error) {
 	companyList := CompanyList{}
 	params := scrollParams{ScrollParam: scrollParam}
-	data, err := api.httpClient.Get("/companies/scroll", params)
+	data, err := api.httpClient.Get(ctx, "/companies/scroll", params)
 	if err != nil {
 		return companyList, err
 	}
@@ -93,7 +94,7 @@ func (api CompanyAPI) scroll(scrollParam string) (CompanyList, error) {
 	return companyList, err
 }
 
-func (api CompanyAPI) save(company *Company) (Company, error) {
+func (api CompanyAPI) save(ctx context.Context, company *Company) (Company, error) {
 	requestCompany := requestCompany{
 		ID:               company.ID,
 		Name:             company.Name,
@@ -105,7 +106,7 @@ func (api CompanyAPI) save(company *Company) (Company, error) {
 	}
 
 	savedCompany := Company{}
-	data, err := api.httpClient.Post("/companies", &requestCompany)
+	data, err := api.httpClient.Post(ctx, "/companies", &requestCompany)
 	if err != nil {
 		return savedCompany, err
 	}

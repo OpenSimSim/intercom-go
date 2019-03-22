@@ -1,6 +1,9 @@
 package intercom
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 // EventService handles interactions with the API through an EventRepository.
 type EventService struct {
@@ -18,8 +21,8 @@ type Event struct {
 }
 
 // Save a new Event
-func (e *EventService) Save(event *Event) error {
-	return e.Repository.save(event)
+func (e *EventService) Save(ctx context.Context, event *Event) error {
+	return e.Repository.save(ctx, event)
 }
 
 func (e Event) String() string {

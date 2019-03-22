@@ -1,16 +1,17 @@
 package intercom
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
-	"gopkg.in/intercom/intercom-go.v2/interfaces"
+	"github.com/opensimsim/intercom-go/interfaces"
 )
 
 // JobRepository defines the interface for working with Jobs.
 type JobRepository interface {
-	save(job *JobRequest) (JobResponse, error)
-	find(id string) (JobResponse, error)
+	save(context.Context, *JobRequest) (JobResponse, error)
+	find(context.Context, string) (JobResponse, error)
 }
 
 // JobAPI implements TagRepository
@@ -18,7 +19,7 @@ type JobAPI struct {
 	httpClient interfaces.HTTPClient
 }
 
-func (api JobAPI) save(job *JobRequest) (JobResponse, error) {
+func (api JobAPI) save(ctx context.Context, job *JobRequest) (JobResponse, error) {
 	for i := range job.Items {
 		obj := job.Items[i].Data
 		switch obj.(type) {
@@ -28,7 +29,7 @@ func (api JobAPI) save(job *JobRequest) (JobResponse, error) {
 		}
 	}
 	savedJob := JobResponse{}
-	data, err := api.httpClient.Post(fmt.Sprintf("/bulk/%s", job.bulkType), job)
+	data, err := api.httpClient.Post(ctx, fmt.Sprintf("/bulk/%s", job.bulkType), job)
 	if err != nil {
 		return savedJob, err
 	}
@@ -36,9 +37,9 @@ func (api JobAPI) save(job *JobRequest) (JobResponse, error) {
 	return savedJob, err
 }
 
-func (api JobAPI) find(id string) (JobResponse, error) {
+func (api JobAPI) find(ctx context.Context, id string) (JobResponse, error) {
 	fetchedJob := JobResponse{}
-	data, err := api.httpClient.Get(fmt.Sprintf("/jobs/%s", id), nil)
+	data, err := api.httpClient.Get(ctx, fmt.Sprintf("/jobs/%s", id), nil)
 	if err != nil {
 		return fetchedJob, err
 	}

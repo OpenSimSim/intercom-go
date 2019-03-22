@@ -1,6 +1,9 @@
 package intercom
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 // TagService handles interactions with the API through a TagRepository.
 type TagService struct {
@@ -19,23 +22,23 @@ type TagList struct {
 }
 
 // List all Tags for the App
-func (t *TagService) List() (TagList, error) {
-	return t.Repository.list()
+func (t *TagService) List(ctx context.Context) (TagList, error) {
+	return t.Repository.list(ctx)
 }
 
 // Save a new Tag for the App.
-func (t *TagService) Save(tag *Tag) (Tag, error) {
-	return t.Repository.save(tag)
+func (t *TagService) Save(ctx context.Context, tag *Tag) (Tag, error) {
+	return t.Repository.save(ctx, tag)
 }
 
 // Delete a Tag
-func (t *TagService) Delete(id string) error {
-	return t.Repository.delete(id)
+func (t *TagService) Delete(ctx context.Context, id string) error {
+	return t.Repository.delete(ctx, id)
 }
 
 // Tag Users or Companies using a TaggingList.
-func (t *TagService) Tag(taggingList *TaggingList) (Tag, error) {
-	return t.Repository.tag(taggingList)
+func (t *TagService) Tag(ctx context.Context, taggingList *TaggingList) (Tag, error) {
+	return t.Repository.tag(ctx, taggingList)
 }
 
 func (t Tag) String() string {

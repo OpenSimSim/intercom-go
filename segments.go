@@ -1,6 +1,9 @@
 package intercom
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 // SegmentService handles interactions with the API through a SegmentRepository.
 type SegmentService struct {
@@ -22,13 +25,13 @@ type SegmentList struct {
 }
 
 // List all Segments for the App
-func (t *SegmentService) List() (SegmentList, error) {
-	return t.Repository.list()
+func (t *SegmentService) List(ctx context.Context) (SegmentList, error) {
+	return t.Repository.list(ctx)
 }
 
 // Find a particular Segment in the App
-func (t *SegmentService) Find(id string) (Segment, error) {
-	return t.Repository.find(id)
+func (t *SegmentService) Find(ctx context.Context, id string) (Segment, error) {
+	return t.Repository.find(ctx, id)
 }
 
 func (s Segment) String() string {

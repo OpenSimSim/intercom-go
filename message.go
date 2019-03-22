@@ -1,6 +1,7 @@
 package intercom
 
 import (
+	"context"
 	"fmt"
 	"strings"
 )
@@ -70,8 +71,8 @@ func (m MessageResponse) String() string {
 }
 
 // Save (send) a Message
-func (m *MessageService) Save(message *MessageRequest) (MessageResponse, error) {
-	return m.Repository.save(message)
+func (m *MessageService) Save(ctx context.Context, message *MessageRequest) (MessageResponse, error) {
+	return m.Repository.save(ctx, message)
 }
 
 // NewEmailMessage creates a new *Message of email type.

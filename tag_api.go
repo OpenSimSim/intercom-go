@@ -1,18 +1,19 @@
 package intercom
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
-	"gopkg.in/intercom/intercom-go.v2/interfaces"
+	"github.com/opensimsim/intercom-go/interfaces"
 )
 
 // TagRepository defines the interface for working with Tags through the API.
 type TagRepository interface {
-	list() (TagList, error)
-	save(tag *Tag) (Tag, error)
-	delete(id string) error
-	tag(tagList *TaggingList) (Tag, error)
+	list(context.Context) (TagList, error)
+	save(context.Context, *Tag) (Tag, error)
+	delete(context.Context, string) error
+	tag(context.Context, *TaggingList) (Tag, error)
 }
 
 // TagAPI implements TagRepository
@@ -20,9 +21,9 @@ type TagAPI struct {
 	httpClient interfaces.HTTPClient
 }
 
-func (api TagAPI) list() (TagList, error) {
+func (api TagAPI) list(ctx context.Context) (TagList, error) {
 	tagList := TagList{}
-	data, err := api.httpClient.Get("/tags", nil)
+	data, err := api.httpClient.Get(ctx, "/tags", nil)
 	if err != nil {
 		return tagList, err
 	}
@@ -30,9 +31,9 @@ func (api TagAPI) list() (TagList, error) {
 	return tagList, err
 }
 
-func (api TagAPI) save(tag *Tag) (Tag, error) {
+func (api TagAPI) save(ctx context.Context, tag *Tag) (Tag, error) {
 	savedTag := Tag{}
-	data, err := api.httpClient.Post("/tags", tag)
+	data, err := api.httpClient.Post(ctx, "/tags", tag)
 	if err != nil {
 		return savedTag, err
 	}
@@ -40,14 +41,14 @@ func (api TagAPI) save(tag *Tag) (Tag, error) {
 	return savedTag, err
 }
 
-func (api TagAPI) delete(id string) error {
-	_, err := api.httpClient.Delete(fmt.Sprintf("/tags/%s", id), nil)
+func (api TagAPI) delete(ctx context.Context, id string) error {
+	_, err := api.httpClient.Delete(ctx, fmt.Sprintf("/tags/%s", id), nil)
 	return err
 }
 
-func (api TagAPI) tag(taggingList *TaggingList) (Tag, error) {
+func (api TagAPI) tag(ctx context.Context, taggingList *TaggingList) (Tag, error) {
 	savedTag := Tag{}
-	data, err := api.httpClient.Post("/tags", taggingList)
+	data, err := api.httpClient.Post(ctx, "/tags", taggingList)
 	if err != nil {
 		return savedTag, err
 	}

@@ -1,6 +1,9 @@
 package intercom
 
-import "fmt"
+import (
+	"context"
+	"fmt"
+)
 
 // JobService builds jobs to process
 type JobService struct {
@@ -51,32 +54,32 @@ type JobData struct {
 }
 
 // NewUserJob creates a new Job for processing Users.
-func (js *JobService) NewUserJob(items ...*JobItem) (JobResponse, error) {
+func (js *JobService) NewUserJob(ctx context.Context, items ...*JobItem) (JobResponse, error) {
 	job := JobRequest{Items: items, bulkType: "users"}
-	return js.Repository.save(&job)
+	return js.Repository.save(ctx, &job)
 }
 
 // NewEventJob creates a new Job for processing Events.
-func (js *JobService) NewEventJob(items ...*JobItem) (JobResponse, error) {
+func (js *JobService) NewEventJob(ctx context.Context, items ...*JobItem) (JobResponse, error) {
 	job := JobRequest{Items: items, bulkType: "events"}
-	return js.Repository.save(&job)
+	return js.Repository.save(ctx, &job)
 }
 
 // Append User items to existing Job
-func (js *JobService) AppendUsers(id string, items ...*JobItem) (JobResponse, error) {
+func (js *JobService) AppendUsers(ctx context.Context, id string, items ...*JobItem) (JobResponse, error) {
 	job := JobRequest{JobData: &JobData{ID: id}, Items: items, bulkType: "users"}
-	return js.Repository.save(&job)
+	return js.Repository.save(ctx, &job)
 }
 
 // Append Event items to existing Job
-func (js *JobService) AppendEvents(id string, items ...*JobItem) (JobResponse, error) {
+func (js *JobService) AppendEvents(ctx context.Context, id string, items ...*JobItem) (JobResponse, error) {
 	job := JobRequest{JobData: &JobData{ID: id}, Items: items, bulkType: "events"}
-	return js.Repository.save(&job)
+	return js.Repository.save(ctx, &job)
 }
 
 // Find existing Job
-func (js *JobService) Find(id string) (JobResponse, error) {
-	return js.Repository.find(id)
+func (js *JobService) Find(ctx context.Context, id string) (JobResponse, error) {
+	return js.Repository.find(ctx, id)
 }
 
 func (j JobResponse) String() string {

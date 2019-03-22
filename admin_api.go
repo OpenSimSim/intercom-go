@@ -1,13 +1,15 @@
 package intercom
 
 import (
+	"context"
 	"encoding/json"
-	"gopkg.in/intercom/intercom-go.v2/interfaces"
+
+	"github.com/opensimsim/intercom-go/interfaces"
 )
 
 // AdminRepository defines the interface for working with Admins through the API.
 type AdminRepository interface {
-	list() (AdminList, error)
+	list(context.Context) (AdminList, error)
 }
 
 // AdminAPI implements AdminRepository
@@ -15,9 +17,9 @@ type AdminAPI struct {
 	httpClient interfaces.HTTPClient
 }
 
-func (api AdminAPI) list() (AdminList, error) {
+func (api AdminAPI) list(ctx context.Context) (AdminList, error) {
 	adminList := AdminList{}
-	data, err := api.httpClient.Get("/admins", nil)
+	data, err := api.httpClient.Get(ctx, "/admins", nil)
 	if err != nil {
 		return adminList, err
 	}

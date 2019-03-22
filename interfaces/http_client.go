@@ -2,6 +2,7 @@ package interfaces
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -12,10 +13,10 @@ import (
 )
 
 type HTTPClient interface {
-	Get(string, interface{}) ([]byte, error)
-	Post(string, interface{}) ([]byte, error)
-	Patch(string, interface{}) ([]byte, error)
-	Delete(string, interface{}) ([]byte, error)
+	Get(context.Context, string, interface{}) ([]byte, error)
+	Post(context.Context, string, interface{}) ([]byte, error)
+	Patch(context.Context, string, interface{}) ([]byte, error)
+	Delete(context.Context, string, interface{}) ([]byte, error)
 }
 
 type IntercomHTTPClient struct {
@@ -35,9 +36,10 @@ func (c IntercomHTTPClient) UserAgentHeader() string {
 	return fmt.Sprintf("intercom-go/%s", *c.ClientVersion)
 }
 
-func (c IntercomHTTPClient) Get(url string, queryParams interface{}) ([]byte, error) {
+func (c IntercomHTTPClient) Get(ctx context.Context, url string, queryParams interface{}) ([]byte, error) {
 	// Setup request
 	req, _ := http.NewRequest("GET", *c.BaseURI+url, nil)
+	req = req.WithContext(ctx)
 	req.SetBasicAuth(c.AppID, c.APIKey)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("User-Agent", c.UserAgentHeader())
@@ -69,15 +71,15 @@ func addQueryParams(req *http.Request, params interface{}) {
 	req.URL.RawQuery = v.Encode()
 }
 
-func (c IntercomHTTPClient) Patch(url string, body interface{}) ([]byte, error) {
-	return c.postOrPatch("PATCH", url, body)
+func (c IntercomHTTPClient) Patch(ctx context.Context, url string, body interface{}) ([]byte, error) {
+	return c.postOrPatch(ctx, "PATCH", url, body)
 }
 
-func (c IntercomHTTPClient) Post(url string, body interface{}) ([]byte, error) {
-	return c.postOrPatch("POST", url, body)
+func (c IntercomHTTPClient) Post(ctx context.Context, url string, body interface{}) ([]byte, error) {
+	return c.postOrPatch(ctx, "POST", url, body)
 }
 
-func (c IntercomHTTPClient) postOrPatch(method, url string, body interface{}) ([]byte, error) {
+func (c IntercomHTTPClient) postOrPatch(ctx context.Context, method, url string, body interface{}) ([]byte, error) {
 	// Marshal our body
 	buffer := bytes.NewBuffer([]byte{})
 	if err := json.NewEncoder(buffer).Encode(body); err != nil {
@@ -86,6 +88,7 @@ func (c IntercomHTTPClient) postOrPatch(method, url string, body interface{}) ([
 
 	// Setup request
 	req, err := http.NewRequest(method, *c.BaseURI+url, buffer)
+	req = req.WithContext(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -115,9 +118,10 @@ func (c IntercomHTTPClient) postOrPatch(method, url string, body interface{}) ([
 	return data, err
 }
 
-func (c IntercomHTTPClient) Delete(url string, queryParams interface{}) ([]byte, error) {
+func (c IntercomHTTPClient) Delete(ctx context.Context, url string, queryParams interface{}) ([]byte, error) {
 	// Setup request
 	req, _ := http.NewRequest("DELETE", *c.BaseURI+url, nil)
+	req = req.WithContext(ctx)
 	req.SetBasicAuth(c.AppID, c.APIKey)
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("User-Agent", c.UserAgentHeader())
